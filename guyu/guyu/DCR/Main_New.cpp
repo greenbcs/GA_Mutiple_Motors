@@ -14,7 +14,17 @@ using std::string;
 #include <TFormula.h>
 #include <TChain.h>
 #include "globle_pars.h"
+#include <mysql++.h>
+#include <string>
+#include <sstream>
 using namespace std;
+using namespace mysqlpp;
+#define DATEBASE_NAME "junopmttest"
+#define DATEBASE_IP "119.23.229.99"
+#define DATEBASE_USERNAME "pmttest"
+#define DATEBASE_PWD "juno20170516"
+#define DATABASE_TABLE "container_test"
+
 char* str_remove_key( char* src,char* key);
 
 void Main_New(char *inDirectory)
@@ -186,34 +196,79 @@ void Main_New(char *inDirectory)
  }   
 
  for(int j=101;j<137;j++)
+ {
+	if(PMTID_Input[j]=="NAN")
+    {outFile<<j<<"  "<<massNumber<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<endl;}
+    else
     {
-     if(PMTID_Input[j]=="NAN")
-     {outFile<<j<<"  "<<massNumber<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<endl;}
-     else
-     {
-     outFile<<j<<"  "<<massNumber<<"  "<<PMTID_Input[j]<<"  "<<HV_Input[j]<<"  "<<Dark_Rate[j]<<endl;
-     //******insert the code here for GUYU*******************
-
-     if(Dark_Rate[j]<1)
-       {
-        outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
-        outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_Bad_connection"<<"  "<<"Container"<<endl;
-       }
-     else
-     {
-     if(PMT_ID[j][0]=='E'&&(Dark_Rate[j]>50))
-       {
-        outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
-        outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_DCR>50K"<<"  "<<"Container"<<endl;
-       }
-    if(PMT_ID[j][0]=='P'&&(Dark_Rate[j]>100))
-       {
-        outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
-        outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_DCR>100K"<<"  "<<"Container"<<endl;
-       }
-      }
-    } 
-  }
+		outFile<<j<<"  "<<massNumber<<"  "<<PMTID_Input[j]<<"  "<<HV_Input[j]<<"  "<<Dark_Rate[j]<<endl;
+		//******insert the code here for GUYU*******************
+		/*----------------------MYSQL MODULE----------------*/
+		Connection conn(false);
+		if (conn.connect(DATEBASE_NAME, DATEBASE_IP, DATEBASE_USERNAME, DATEBASE_PWD))
+		{
+			time_t now = time(0);
+			char Day[45];
+			strftime(Day, sizeof(Date), "%Y-%m-%d", localtime(&now));
+			string Date;
+			Date = Day;
+			stringstream SS;
+			SS.str("");
+			SS << "SELECT * FROM " << DATABASE_TABLE << " WHERE Channel='" << j << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMTID_Input[j] << "'";
+			cout << SS.str() << endl;
+			string QuerySQL = SS.str();
+			Query query = conn.query(QuerySQL);
+		    StoreQueryResult res = query.store();
+			if ( res.num_rows() > 0)
+			{ 
+				cout << "This record is already existed!" << endl;
+				SS.str("");
+				string UpdateSQL="UPDATE ";
+				SS << UpdateSQL << DATABASE_TABLE << " SET " << "Dark_count_rate='" << Dark_Rate[j] << "' WHERE Channel='" << j << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMTID_Input[j] << "'";
+				UpdateSQL = SS.str();
+				cout << UpdateSQL << endl;
+				Query query1 = conn.query(UpdateSQL);
+				StoreQueryResult res1 = query1.store();
+				cout << PMTID_Input[j] << " Update Success!" << endl;
+			}
+			else 
+			{ 
+				cout << "This record is not existed!" << endl;
+				SS.str("");
+				string InsertSQL="INSERT INTO ";
+				SS << InsertSQL << DATABASE_TABLE << "(Channel,Mass_ID,PMT_ID,Dark_count_rate) VALUES ('" <<  j << "','" << massNumber << "','" << PMTID_Input[j] << "','" << Dark_Rate[j] << "')";
+				InsertSQL = SS.str();
+				cout << InsertSQL << endl;
+				Query query2 = conn.query(InsertSQL);
+				StoreQueryResult res2 = query2.store();
+				cout << PMTID_Input[j] << " Insert Success!" << endl;
+			}
+		}
+		else
+		{
+			cout << "DB connection fault!" << endl;
+		};
+		/*------------------------MYSQL MODULE END------------*/
+		if(Dark_Rate[j]<1)
+		{
+			outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
+			outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_Bad_connection"<<"  "<<"Container"<<endl;
+		}
+		else
+		{
+			if(PMT_ID[j][0]=='E'&&(Dark_Rate[j]>50))
+			{
+				outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
+				outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_DCR>50K"<<"  "<<"Container"<<endl;
+			}
+			if(PMT_ID[j][0]=='P'&&(Dark_Rate[j]>100))
+			{
+			outFile_tag<<"channel_ID:"<<j<<"---"<<"PMT_ID:"<<PMT_ID[j]<<"---"<<"HV:"<<HV_Input[j]<<"---"<<"Darkrate:"<<Dark_Rate[j]<<"==>container"<<endl;
+			outFile_tag_new<<massNumber<<"  "<<j<<"  "<<HV_Input[j]<<"  "<<PMT_ID[j]<<"  "<<"DCR="<<Dark_Rate[j]<<"  "<<"Red_DCR>100K"<<"  "<<"Container"<<endl;
+			}
+		}
+	} 
+ }
   
 }
 //the function of moving some chars 

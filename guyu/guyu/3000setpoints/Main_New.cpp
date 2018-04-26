@@ -121,55 +121,57 @@ outFile_tag_new.open(tmpTagName_new);
 outFile.open(tmpFileName);
 outFile<<"Channel"<<"  "<<"Mass_ID"<<"  "<<"PMT_ID"<<"  "<<"MCP_Hama"<<"  "<<"HV"<<"  "<<"Gain"<<"  "<<"Mu"<<"  "<<"CF"<<"  "<<"Mu_charge"<<"  "<<"CF_charge"<<"  "<<"Mean_charge"<<"  "<<"Amplitude"<<"  "<<"Resolution"<<"  "<<"P/V"<<"  "<<"S/N"<<"  "<<"Risetime"<<"  "<<"Falltime"<<"  "<<"FWHM"<<"  "<<"Prepulse_proportion"<<"  "<<"Dark_rate"<<"  "<<"Pedestal_chi2_ndf"<<"  "<<"Signal_chi2_ndf"<<"  "<<"PDE"<<"  "<<"Hittime"<<"  "<<"TTS"<<"  "<<"Prepulse_proportion_sub"<<endl;
 for(int i=101;i<137;i++)
-    {
-	Connection conn(false);
+{
     if (i!=131)
-       {
+    {
         outFile<<i<<"  "<<massNumber<<"  "<<PMT_ID[i]<<"  "<<Mcp_Hama[i]<<"  "<<HV[i]<<"  "<<Gain[i]<<"  "<<Mu[i]<<"  "<<CF[i]<<"  "<<Mu_charge[i]<<"  "<<CF_charge[i]<<"  "<<Mean_charge[i]<<"  "<<Amplitude[i]<<"  "<<Resolution[i]<<"  "<<P_V[i]<<"  "<<S_N[i]<<"  "<<Risetime[i]<<"  "<<Falltime[i]<<"  "<<FWHM_NEW[i]<<"  "<<Prepulse_proportion[i]<<"  "<<Dark_rate[i]<<"  "<<Pedestal_chi2_ndf[i]<<"  "<<Signal_chi2_ndf[i]<<"  "<<PDE[i]<<"  "<<Hittime[i]<<"  "<<TTS[i]<<"  "<<Prepulse_proportion_sub[i]<<endl;
+		/*----------------------MYSQL MODULE----------------*/
+		Connection conn(false);
     	if (conn.connect(DATEBASE_NAME, DATEBASE_IP, DATEBASE_USERNAME, DATEBASE_PWD))
 		{
-		time_t now = time(0);
-		char Day[45];
-		strftime(Day, sizeof(Date), "%Y-%m-%d", localtime(&now));
-		string Date;
-		Date = Day;
-		stringstream SS;
-		SS.str("");
-		SS << "SELECT * FROM " << DATABASE_TABLE << " WHERE Channel='" << i << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMT_ID[i] << "'";
-		cout << SS.str() << endl;
-		string QuerySQL = SS.str();
-		Query query = conn.query(QuerySQL);
-        StoreQueryResult res = query.store();
-		if ( res.num_rows() > 0)
-			{ 
-			cout << "This record is already existed!" << endl;
+			time_t now = time(0);
+			char Day[45];
+			strftime(Day, sizeof(Date), "%Y-%m-%d", localtime(&now));
+			string Date;
+			Date = Day;
+			stringstream SS;
 			SS.str("");
-			string UpdateSQL="UPDATE ";
-			SS << UpdateSQL << DATABASE_TABLE << " SET " << "Gain_at_setpoints3000='" << Gain[i] << "',Mu_at_setpoints3000='" << Mu[i] << "',CF_at_setpoints3000='" << CF[i] << "',Mu_Charge_at_setpoints3000='" << Mu_charge[i] << "',CF_charge_at_setpoints3000='" << CF_charge[i] << "',Mean_charge_at_setpoints3000='" << Mean_charge[i] << "',Amplitude_at_setpoints3000='" << Amplitude[i] << "',Resolution_at_setpoints3000='" << Resolution[i] << "',PvsV_at_setpoints3000='" << P_V[i] << "',SvsN_at_setpoints3000='" << S_N[i] << "',Risetime_at_setpoints3000='" << Risetime[i] << "',Falltime_at_setpoints3000='" << Falltime[i] << "',FWHM_at_setpoints3000='" << FWHM_NEW[i] << "',Prepulse_proportion_at_setpoints3000='" << Prepulse_proportion[i] << "',Dark_rate_at_setpoints3000='" << Dark_rate[i] << "',Pedestal_chi2_ndf_at_setpoints3000='" << Pedestal_chi2_ndf[i] << "',Signal_chi2_ndf_at_setpoints3000='" << Signal_chi2_ndf[i] << "',PDE_at_setpoints3000='" << PDE[i] << "',Hittime_at_setpoints3000='" << Hittime[i] << "',TTS_LED_at_setpoints3000='" << TTS[i] << "',Prepulse_proportion_sub_at_setpoints3000='" << Prepulse_proportion_sub[i] << "' WHERE Channel='" << i << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMT_ID[i] << "'";
-			UpdateSQL = SS.str();
-			cout << UpdateSQL << endl;
-			Query query1 = conn.query(UpdateSQL);
-			StoreQueryResult res1 = query1.store();
-			cout << PMT_ID << " Update Success!" << endl;
+			SS << "SELECT * FROM " << DATABASE_TABLE << " WHERE Channel='" << i << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMT_ID[i] << "'";
+			cout << SS.str() << endl;
+			string QuerySQL = SS.str();
+			Query query = conn.query(QuerySQL);
+			StoreQueryResult res = query.store();
+			if ( res.num_rows() > 0)
+			{ 
+				cout << "This record is already existed!" << endl;
+				SS.str("");
+				string UpdateSQL="UPDATE ";
+				SS << UpdateSQL << DATABASE_TABLE << " SET " << "Gain_at_setpoints3000='" << Gain[i] << "',Mu_at_setpoints3000='" << Mu[i] << "',CF_at_setpoints3000='" << CF[i] << "',Mu_Charge_at_setpoints3000='" << Mu_charge[i] << "',CF_charge_at_setpoints3000='" << CF_charge[i] << "',Mean_charge_at_setpoints3000='" << Mean_charge[i] << "',Amplitude_at_setpoints3000='" << Amplitude[i] << "',Resolution_at_setpoints3000='" << Resolution[i] << "',PvsV_at_setpoints3000='" << P_V[i] << "',SvsN_at_setpoints3000='" << S_N[i] << "',Risetime_at_setpoints3000='" << Risetime[i] << "',Falltime_at_setpoints3000='" << Falltime[i] << "',FWHM_at_setpoints3000='" << FWHM_NEW[i] << "',Prepulse_proportion_at_setpoints3000='" << Prepulse_proportion[i] << "',Dark_rate_at_setpoints3000='" << Dark_rate[i] << "',Pedestal_chi2_ndf_at_setpoints3000='" << Pedestal_chi2_ndf[i] << "',Signal_chi2_ndf_at_setpoints3000='" << Signal_chi2_ndf[i] << "',PDE_at_setpoints3000='" << PDE[i] << "',Hittime_at_setpoints3000='" << Hittime[i] << "',TTS_LED_at_setpoints3000='" << TTS[i] << "',Prepulse_proportion_sub_at_setpoints3000='" << Prepulse_proportion_sub[i] << "' WHERE Channel='" << i << "' AND Mass_ID='" << massNumber << "' AND PMT_ID ='" << PMT_ID[i] << "'";
+				UpdateSQL = SS.str();
+				cout << UpdateSQL << endl;
+				Query query1 = conn.query(UpdateSQL);
+				StoreQueryResult res1 = query1.store();
+				cout << PMT_ID[i] << " Update Success!" << endl;
 			}
-		else 
+			else 
 			{ 
-			cout << "This record is not existed!" << endl;
-			SS.str("");
-			string InsertSQL="INSERT INTO ";
-			SS << InsertSQL << DATABASE_TABLE << "(Channel,Mass_ID,PMT_ID,MCP_Hama,HV,Gain_at_setpoints3000,Mu_at_setpoints3000,CF_at_setpoints3000,Mu_Charge_at_setpoints3000,CF_charge_at_setpoints3000,Mean_charge_at_setpoints3000,Amplitude_at_setpoints3000,Resolution_at_setpoints3000,PvsV_at_setpoints3000,SvsN_at_setpoints3000,Risetime_at_setpoints3000,Falltime_at_setpoints3000,FWHM_at_setpoints3000,Prepulse_proportion_at_setpoints3000,Dark_rate_at_setpoints3000,Pedestal_chi2_ndf_at_setpoints3000,Signal_chi2_ndf_at_setpoints3000,PDE_at_setpoints3000,Hittime_at_setpoints3000,TTS_LED_at_setpoints3000,Prepulse_proportion_sub_at_setpoints3000) VALUES ('" <<  i << "','" << massNumber << "','" << PMT_ID[i] << "','" << Mcp_Hama << "','" << HV << "','" << Gain[i] << "','" << Mu[i] << "','" << CF[i] << "','" << Mu_charge[i] << "','" << CF_charge[i] << "','" << Mean_charge[i] << "','" << Amplitude[i] << "','" << Resolution[i] << "','" << P_V[i] << "','" << S_N[i] << "','" << Risetime[i] << "','" << Falltime[i] << "','" << FWHM_NEW[i] << "','" << Prepulse_proportion[i] << "','" << Dark_rate[i] << "','" << Pedestal_chi2_ndf[i] << "','" << Signal_chi2_ndf[i] << "','" << PDE[i] << "','" << Hittime[i] << "','" << TTS[i] << "','" << Prepulse_proportion_sub[i] << "')";
-			InsertSQL = SS.str();
-			cout << InsertSQL << endl;
-			Query query2 = conn.query(InsertSQL);
-			StoreQueryResult res2 = query2.store();
-			cout << PMT_ID << " Insert Success!" << endl;
+				cout << "This record is not existed!" << endl;
+				SS.str("");
+				string InsertSQL="INSERT INTO ";
+				SS << InsertSQL << DATABASE_TABLE << "(Channel,Mass_ID,PMT_ID,MCP_Hama,HV,Gain_at_setpoints3000,Mu_at_setpoints3000,CF_at_setpoints3000,Mu_Charge_at_setpoints3000,CF_charge_at_setpoints3000,Mean_charge_at_setpoints3000,Amplitude_at_setpoints3000,Resolution_at_setpoints3000,PvsV_at_setpoints3000,SvsN_at_setpoints3000,Risetime_at_setpoints3000,Falltime_at_setpoints3000,FWHM_at_setpoints3000,Prepulse_proportion_at_setpoints3000,Dark_rate_at_setpoints3000,Pedestal_chi2_ndf_at_setpoints3000,Signal_chi2_ndf_at_setpoints3000,PDE_at_setpoints3000,Hittime_at_setpoints3000,TTS_LED_at_setpoints3000,Prepulse_proportion_sub_at_setpoints3000) VALUES ('" <<  i << "','" << massNumber << "','" << PMT_ID[i] << "','" << Mcp_Hama << "','" << HV << "','" << Gain[i] << "','" << Mu[i] << "','" << CF[i] << "','" << Mu_charge[i] << "','" << CF_charge[i] << "','" << Mean_charge[i] << "','" << Amplitude[i] << "','" << Resolution[i] << "','" << P_V[i] << "','" << S_N[i] << "','" << Risetime[i] << "','" << Falltime[i] << "','" << FWHM_NEW[i] << "','" << Prepulse_proportion[i] << "','" << Dark_rate[i] << "','" << Pedestal_chi2_ndf[i] << "','" << Signal_chi2_ndf[i] << "','" << PDE[i] << "','" << Hittime[i] << "','" << TTS[i] << "','" << Prepulse_proportion_sub[i] << "')";
+				InsertSQL = SS.str();
+				cout << InsertSQL << endl;
+				Query query2 = conn.query(InsertSQL);
+				StoreQueryResult res2 = query2.store();
+				cout << PMT_ID[i] << " Insert Success!" << endl;
 			}
 		}
-	else
+		else
 		{
-		cout << "DB connection fault!" << endl;
-		};	
-    }
+			cout << "DB connection fault!" << endl;
+		};
+		/*------------------------MYSQL MODULE END------------*/
+	}
     if (i==131)
        {outFile<<i<<"  "<<massNumber<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<"  "<<"NAN"<<endl;
     }
@@ -191,7 +193,7 @@ for(int i=101;i<137;i++)
            outFile_tag_new<<massNumber<<"  "<<i<<"  "<<HV[i]<<"  "<<PMT_ID[i]<<"  "<<"PDE="<<PDE[i]<<"  "<<"Red_PDE<23"<<"  "<<"Rejection"<<endl;
           }
         }      
-        }
+    }
     
 }
 outFile.close();
